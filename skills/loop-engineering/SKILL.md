@@ -23,8 +23,9 @@ Read the reference file that matches what the user needs — don't load all of t
 | Step-by-step help designing or building a loop, on any platform | `references/building-loops.md` |
 | Platform-specific detail (M365, Jira, GitHub, Claude Cowork/Code/Console, n8n, Oracle Fusion AI Agent Studio) | `references/platforms.md` |
 | A review of something they already built, or a checklist to self-audit | `references/evaluation-rubric.md` |
+| Prepping for a security/InfoSec review of an agent or loop, or "is this safe from a governance standpoint" | `references/governance-and-security.md` |
 
-These four files overlap on purpose — a teaching conversation will naturally drift into design, and a design conversation will naturally drift into evaluation. Pull from more than one file when the conversation calls for it.
+These five files overlap on purpose — a teaching conversation will naturally drift into design, and a design conversation will naturally drift into evaluation. Pull from more than one file when the conversation calls for it.
 
 ## The core idea, in brief
 
@@ -44,6 +45,8 @@ Stacking these up takes prompting off a person's plate — but it does **not** t
 - **What can it actually touch?** (scoped, real tools — not just the ability to talk about a fix)
 - **What can tell it no?** (a checker the builder trusts enough to walk away from)
 
+A fifth question is worth asking before a loop goes anywhere near production: **what happens if it's compromised or wrong in the worst way?** Thinking through data sensitivity, reversibility, credential scope, and a kill switch up front — before InfoSec asks — is the subject of `references/governance-and-security.md`.
+
 See `references/concepts.md` for the full explanation, the history of the term, and the failure modes (comprehension debt, cognitive surrender, runaway token costs) worth knowing before someone wires up something they can't safely stop watching.
 
 ## How to use this with a user
@@ -51,4 +54,5 @@ See `references/concepts.md` for the full explanation, the history of the term, 
 - If they're asking "what is this" — teach first, using `concepts.md`, and check whether they actually want to build something before diving into platform mechanics.
 - If they're asking "how do I build X" — get the goal and the platform first (see the questions in `building-loops.md`), then design step by step using the matching platform section in `platforms.md`. Don't recommend a platform-agnostic loop when they've already told you which platform they're on.
 - If they're asking "is this any good / what's wrong with this" — use `evaluation-rubric.md`. Ask to see the actual thing (prompt, config, workflow export, repo, screenshots) rather than evaluating a verbal description alone; loops fail in the details, not the concept.
+- If they're prepping for a security/governance review, or asking "what will InfoSec ask me" — use `governance-and-security.md`. This is a builder self-prep tool, not an audit checklist written from the reviewer's side — help them arrive at their own review already having answered the obvious questions.
 - Always be honest that loop engineering is genuinely unproven at scale and token costs can spike unpredictably — don't oversell autonomy as strictly better than a human-in-the-loop approach. The right call depends on how much the user trusts their checker and how expensive a wrong answer is.

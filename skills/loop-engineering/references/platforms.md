@@ -117,8 +117,41 @@ AI Agent Studio is the agent-building layer inside Oracle Fusion (ERP/HCM/SCM/CX
 
 ## Mixing platforms in one loop
 
-Real loops often span platforms — e.g., a Jira automation rule triggers GitHub's coding agent, which is verified by CI, with Slack or Teams as the notification layer. When this comes up:
+Real loops often span platforms — e.g., a Jira automation rule triggers GitHub's coding agent, which is verified by CI, with Slack or Teams as the notification layer. Cross-platform loops fail most often at the seams, not within any one platform's own logic — the work below is about making the seams explicit instead of implicit.
 
-- Pick one platform to hold the **definition of done** and **memory/state**, so there's a single source of truth rather than three systems each thinking they're authoritative.
-- Make sure each handoff between platforms is itself observable (a status update lands somewhere visible) — cross-platform loops fail most often at the seams, where one system assumes the other did something it didn't.
-- MCP is the common thread across most of these (GitHub, Claude products, n8n) — when a connector needs to be built once and reused, building it as an MCP server is usually the most portable choice.
+### Build an ownership matrix first
+
+Before wiring anything, write down which single platform owns each of these — not "could check," but **authoritative source**:
+
+| Concern | Owned by (pick one) |
+|---|---|
+| Definition of done | |
+| Memory / current state | |
+| Trigger for the next step | |
+| Verifier of record | |
+| Human approval gate (if any) |  |
+
+If two platforms could plausibly answer "is this done yet," that's the bug, not a detail to sort out later — pick one, and have every other platform defer to it rather than keeping its own parallel answer. The same goes for state: the moment two systems each think they hold the current status, they will eventually disagree, and the loop will act on stale information from whichever one nobody's looking at.
+
+### A handoff checklist
+
+For every point where work crosses from one platform to another, confirm:
+
+- **The handoff is itself observable.** Something visible changes (a status field, a posted comment, a label) at the moment work moves — not just a side effect a person has to infer happened.
+- **The receiving platform has enough context, not just a pointer.** A link to "see the Jira ticket" is weaker than the receiving agent actually being fed the relevant fields/comments at handoff time — don't assume the next platform will go fetch context on its own.
+- **There's a timeout or stuck-state alarm.** If the receiving platform never picks up the handed-off work (an integration is down, a queue backs up), something should notice and surface that — silently waiting forever is a common cross-platform failure mode.
+- **Failure on one side doesn't get silently swallowed by the other.** If GitHub's coding agent fails, does Jira's automation rule know, or does the ticket just sit there looking "in progress" forever? Decide what failure propagation looks like before relying on the chain.
+- **Identity is consistent across the seam.** If platform A acts as a service account and platform B logs actions under a person's name, an audit trail reconstructed later will be confusing or wrong — keep the acting identity traceable end to end (see `governance-and-security.md`).
+
+### Worked example: Jira → GitHub → Slack/Teams
+
+A common chain, walked through against the checklist above:
+
+1. **Jira** owns the definition of done (the ticket's acceptance criteria) and the current state (ticket status). An automation rule fires the "Use GitHub Copilot" action when a ticket is labeled `ready-for-agent`.
+2. **Handoff to GitHub:** the rule passes the issue's description and comments as context, not just a link — Copilot's coding agent reads that content directly rather than re-deriving intent from a bare issue number.
+3. **GitHub** owns execution and the verifier of record: CI plus required review on the resulting PR. GitHub posts status updates back into the Jira issue's agent panel as it works, so the handoff is observable in both directions, not just outbound.
+4. **Handoff to Slack/Teams:** a notification fires on specific state changes (PR opened, PR merged, CI failed) — not a duplicate of everything Jira/GitHub already show, just the events a human actually needs to act on.
+5. **Stuck-state check:** if no GitHub activity appears within a defined window after the handoff (say, a few hours), the automation rule (or a separate watcher) flags the ticket back to a human rather than leaving it silently "in progress." This is the timeout alarm from the checklist — without it, a failed handoff looks identical to a slow one.
+6. **Closing the loop:** once the PR merges, GitHub (not a person, and not Slack) is the system of record that transitions the Jira ticket — keeping "what actually happened" anchored to the platform that owns verification, consistent with the ownership matrix decided up front.
+
+MCP is the common thread across most of these (GitHub, Claude products, n8n) — when a connector needs to be built once and reused across a chain like this, building it as an MCP server is usually the most portable choice.

@@ -25,7 +25,7 @@ Score each as **Solid / Needs work / Missing**, with a one-line reason. These ma
 4. **Tool/connector design.** Can the agent actually *do* the thing, or only describe it? Are the tools/connectors scoped narrowly enough to reason about, or is access broader than the task needs? Do failures show up as clear errors, or fail silently/ambiguously?
 5. **Isolation.** If more than one run can happen concurrently, is there a mechanism (worktree, branch, sandbox, lock) preventing collisions? If only one run ever happens at a time, this dimension may legitimately be N/A — don't penalize a loop for skipping isolation it doesn't need.
 6. **Memory/state.** Is there a durable record outside the model of what's done and what's next? Would the next run pick up where the last one left off, or start cold every time?
-7. **Stakes and oversight match.** Does the level of human oversight (none / async review / hard approval gate) match how reversible the agent's actions actually are? An agent that can email customers, spend money, change permissions, or delete data with no gate is a red flag regardless of how good the other six dimensions are.
+7. **Stakes and oversight match.** Does the level of human oversight (none / async review / hard approval gate) match how reversible the agent's actions actually are? An agent that can email customers, spend money, change permissions, or delete data with no gate is a red flag regardless of how good the other six dimensions are. If this dimension scores anything below Solid, or the user mentions an upcoming security/InfoSec review, point them to `governance-and-security.md` for the fuller builder-side prep.
 
 ## How to score and report
 

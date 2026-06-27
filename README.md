@@ -7,6 +7,7 @@ A personal collection of Claude Skills — reusable knowledge packages that can 
 | Skill | Description |
 |-------|-------------|
 | [loop-engineering](skills/loop-engineering/) | Designing systems that schedule and supervise AI agents instead of prompting turn-by-turn |
+| [context-engineering](skills/context-engineering/) | Deciding what belongs in an AI agent's context window (prompt vs. file vs. retrieved vs. memory) and fixing context rot in long-running or automated work |
 
 ## How to install a skill
 
